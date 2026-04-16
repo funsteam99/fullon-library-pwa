@@ -25,3 +25,6 @@ npm run dev
 - 後端健康檢查：`http://localhost:4000/api/health`
 
 前端透過 rewrite 將 `/api/*` 轉發到 `http://localhost:4000/api/*`。
+
+## Remote deployment notes (Windows + Tailscale)
+See `docs/REMOTE_INSTALL_WINDOWS_TAILSCALE.md` for remote install steps and pitfall notes.
