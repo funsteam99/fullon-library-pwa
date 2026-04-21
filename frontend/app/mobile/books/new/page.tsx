@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   type ChangeEvent,
   type FormEvent,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -142,6 +143,7 @@ export default function MobileBookCreatePage() {
   const [remark, setRemark] = useState("");
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [aiFiles, setAiFiles] = useState<File[]>([]);
+  const [aiPreviewUrls, setAiPreviewUrls] = useState<string[]>([]);
   const [aiMessage, setAiMessage] = useState<string | null>(null);
   const [isAiPending, setIsAiPending] = useState(false);
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -169,6 +171,15 @@ export default function MobileBookCreatePage() {
 
   const canUseIsbnAsAccession = useMemo(() => isbn.trim().length > 0, [isbn]);
   const activeCandidate = lookupCandidates[activeCandidateIndex] ?? null;
+
+  useEffect(() => {
+    const urls = aiFiles.map((file) => URL.createObjectURL(file));
+    setAiPreviewUrls(urls);
+
+    return () => {
+      urls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [aiFiles]);
 
   function closeScannerForManualInput() {
     setScannerCloseSignal((value) => value + 1);
@@ -453,6 +464,19 @@ export default function MobileBookCreatePage() {
     setAiMessage("已加入相機圖片，可執行 AI 辨識。");
   }
 
+  function useAiImageAsCover(index: number) {
+    const file = aiFiles[index];
+    const previewUrl = aiPreviewUrls[index];
+
+    if (!file || !previewUrl) {
+      return;
+    }
+
+    setCoverFile(file);
+    setCoverPreview(previewUrl);
+    setAiMessage(`已將第 ${index + 1} 張 AI 圖片設為封面候選。`);
+  }
+
   async function handleAiIngest() {
     if (aiFiles.length === 0) {
       setAiMessage("請先選擇至少一張圖片。");
@@ -567,7 +591,10 @@ export default function MobileBookCreatePage() {
       <article className="hero-card compact">
         <p className="eyebrow">Book intake</p>
         <h2>書籍建檔</h2>
-        <p>可先掃 ISBN 帶入多個來源的候選資料，再補館藏條碼、封面與備註。</p>
+        <p>
+          建檔流程可三選一或混用：先掃描 ISBN 自動帶入資料、用 AI 辨識封面/版權頁補欄位，
+          或直接手動輸入。最後補上館藏條碼、封面與備註後送出。
+        </p>
       </article>
 
       <section className="action-grid compact">
@@ -602,6 +629,7 @@ export default function MobileBookCreatePage() {
         helperText="可掃 ISBN 或館藏條碼。若要手動輸入 ISBN，點入欄位後會自動關閉掃描器。"
         onDetected={handleBookCodeDetected}
         closeSignal={scannerCloseSignal}
+        labelButtonClassName="scan-action-button"
       />
 
       <section className="mobile-form">
@@ -620,7 +648,7 @@ export default function MobileBookCreatePage() {
           <small>可上傳封面/版權頁，最多 3 張，帶入 ISBN、書名、作者、出版社、出版年。</small>
         </div>
         <div className="inline-actions">
-          <button type="button" className="ghost-button" onClick={() => void handleAiIngest()} disabled={isAiPending || aiFiles.length === 0}>
+          <button type="button" className="ghost-button ai-action-button" onClick={() => void handleAiIngest()} disabled={isAiPending || aiFiles.length === 0}>
             {isAiPending ? "AI 辨識中..." : "用 AI 帶入欄位"}
           </button>
           <button
@@ -637,6 +665,26 @@ export default function MobileBookCreatePage() {
         </div>
         <small>目前 AI 圖片數量：{aiFiles.length} / 3</small>
         <CameraCapture label="用相機拍 AI 辨識圖片" onCapture={(file) => handleAiCameraCapture(file)} />
+
+        {aiFiles.length > 0 ? (
+          <div className="feedback-meta">
+            <div>AI 圖片可作為封面候選（點選套用）：</div>
+            <div className="inline-actions">
+              {aiFiles.map((file, index) => (
+                <button
+                  key={`${file.name}-${index}`}
+                  type="button"
+                  className="ghost-button"
+                  onClick={() => useAiImageAsCover(index)}
+                  title="設為封面候選"
+                >
+                  {index + 1}. {file.name || `相機圖片 ${index + 1}`}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
         {aiMessage ? <div className="feedback">{aiMessage}</div> : null}
       </section>
 
