@@ -462,7 +462,9 @@ export default function MobileBookCreatePage() {
 
       if (!response.ok) {
         const payload = (await response.json().catch(() => ({}))) as { message?: string };
-        throw new Error(payload.message || "AI 影像辨識失敗");
+        const detail = payload.message?.trim();
+        const reason = detail || `HTTP ${response.status} ${response.statusText}`;
+        throw new Error(`AI 影像辨識失敗：${reason}`);
       }
 
       const payload = (await response.json()) as AiIngestResponse;
@@ -481,7 +483,18 @@ export default function MobileBookCreatePage() {
 
       setAiMessage(`AI 已帶入欄位${item.confidence != null ? `（信心 ${Math.round(item.confidence * 100)}%）` : ""}。`);
     } catch (ingestError) {
-      setAiMessage(ingestError instanceof Error ? ingestError.message : "AI 影像辨識失敗");
+      const base = ingestError instanceof Error ? ingestError.message : "AI 影像辨識失敗";
+      let hint = "";
+      if (base.includes("missing GEMINI_API_KEY")) {
+        hint = "（後端未設定 GEMINI_API_KEY）";
+      } else if (base.includes("No images uploaded")) {
+        hint = "（尚未選擇圖片）";
+      } else if (base.includes("timeout") || base.includes("timed out")) {
+        hint = "（模型回應逾時，請重試或減少圖片張數）";
+      } else if (base.includes("429") || base.includes("rate")) {
+        hint = "（API 速率限制，稍後再試）";
+      }
+      setAiMessage(`${base}${hint}`);
     } finally {
       setIsAiPending(false);
     }
