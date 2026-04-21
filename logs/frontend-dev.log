@@ -1,0 +1,52 @@
+
+> library-system-frontend@0.1.0 dev
+> next dev -p 3000
+
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /home/user/package-lock.json as the root directory.
+ To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+ Detected additional lockfiles: 
+   * /home/user/clawd/projects/fullon-library-pwa/frontend/package-lock.json
+
+   ▲ Next.js 15.5.13
+   - Local:        http://localhost:3000
+   - Network:      http://10.255.255.254:3000
+
+ ✓ Starting...
+ ✓ Ready in 2.1s
+ ⚠ Cross origin request detected from 127.0.0.1 to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ○ Compiling /mobile/books/new ...
+ ✓ Compiled /mobile/books/new in 4.1s (666 modules)
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /mobile/books/new 200 in 4509ms
+ GET /mobile/books/new 200 in 62ms
+ GET /mobile/books/new 200 in 54ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1166ms (664 modules)
+ GET /sw.js 404 in 1007ms
+ GET /mobile 200 in 1350ms
+ GET /sw.js 404 in 28ms
+ GET /sw.js 404 in 34ms
+ GET /sw.js 404 in 31ms
+Failed to proxy http://localhost:4000/api/books/ingest/image [Error: socket hang up] { code: 'ECONNRESET' }
+[Error: socket hang up] { code: 'ECONNRESET' }
+ ○ Compiling /_error ...
+ ✓ Compiled /_not-found in 1539ms (1011 modules)
+ GET /sw.js 404 in 759ms
+ GET /mobile/books/new 200 in 768ms
+ GET /mobile/books/new 200 in 23ms
+Failed to proxy http://localhost:4000/api/books/ingest/image [Error: socket hang up] { code: 'ECONNRESET' }
+[Error: socket hang up] { code: 'ECONNRESET' }
+ GET /sw.js 404 in 28ms
+Failed to proxy http://localhost:4000/api/books/ingest/image [Error: socket hang up] { code: 'ECONNRESET' }
+[Error: socket hang up] { code: 'ECONNRESET' }
+ GET /sw.js 404 in 26ms
+Failed to proxy http://localhost:4000/api/books/ingest/image [Error: socket hang up] { code: 'ECONNRESET' }
+[Error: socket hang up] { code: 'ECONNRESET' }
+ GET /sw.js 404 in 26ms
+ GET /mobile/books/new 200 in 88ms
+ GET /sw.js 404 in 35ms
+ GET /sw.js 404 in 44ms

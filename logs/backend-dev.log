@@ -1,0 +1,17 @@
+
+> library-system-backend@0.1.0 dev
+> tsx watch src/server.ts
+
+Backend running on http://localhost:4000
+[0mGET /api/health [32m200[0m 1.596 ms - 85[0m
+[0mPOST /api/books/ingest/image [33m400[0m 63.806 ms - 32[0m
+[0mGET /api/users [32m200[0m 69.558 ms - 265[0m
+[0mGET /api/users [32m200[0m 2.093 ms - 265[0m
+[0mGET /api/users [32m200[0m 79.585 ms - 265[0m
+[0mGET /api/users [32m200[0m 63.976 ms - 265[0m
+[0mPOST /api/books/ingest/image [32m200[0m 29380.132 ms - 187[0m
+[0mPOST /api/books/ingest/image [0m-[0m - ms - -[0m
+[0mPOST /api/books/ingest/image [0m-[0m - ms - -[0m
+[0mPOST /api/books/ingest/image [0m-[0m - ms - -[0m
+[0mPOST /api/books/ingest/image [0m-[0m - ms - -[0m
+[0mGET /api/users [32m200[0m 62.395 ms - 265[0m
