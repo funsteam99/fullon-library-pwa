@@ -120,12 +120,14 @@ function resolveAiIngestUrl() {
     return getApiUrl("/api/books/ingest/image");
   }
 
-  const envBase = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (envBase) {
-    return `${envBase}/api/books/ingest/image`;
+  const host = window.location.hostname;
+  const isLocalLike = host === "localhost" || host === "127.0.0.1" || host.startsWith("192.168.");
+
+  if (window.location.protocol === "http:" && isLocalLike) {
+    return `http://${host}:4000/api/books/ingest/image`;
   }
 
-  return `${window.location.protocol}//${window.location.hostname}:4000/api/books/ingest/image`;
+  return getApiUrl("/api/books/ingest/image");
 }
 
 export default function MobileBookCreatePage() {

@@ -32,7 +32,27 @@ export function createApp() {
   };
 
   app.use(helmet());
-  app.use(cors({ origin: env.corsOrigin, credentials: true }));
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        const allowlist = new Set([
+          env.corsOrigin,
+          ...env.corsOrigins,
+          "http://localhost:3000",
+          "http://127.0.0.1:3000",
+          "http://192.168.0.112:3000",
+        ]);
+
+        if (!origin || allowlist.has(origin)) {
+          callback(null, true);
+          return;
+        }
+
+        callback(new Error("Not allowed by CORS"));
+      },
+      credentials: true,
+    }),
+  );
   app.use(express.json({ limit: "10mb" }));
   app.use(morgan("dev", { stream: safeMorganStream }));
 
