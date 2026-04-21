@@ -430,6 +430,14 @@ export default function MobileBookCreatePage() {
     void checkDuplicates(isbn, accessionCode);
   }
 
+  function handleAiCameraCapture(file: File) {
+    setAiFiles((prev) => {
+      const next = [...prev, file];
+      return next.slice(0, 3);
+    });
+    setAiMessage("已加入相機圖片，可執行 AI 辨識。");
+  }
+
   async function handleAiIngest() {
     if (aiFiles.length === 0) {
       setAiMessage("請先選擇至少一張圖片。");
@@ -586,7 +594,20 @@ export default function MobileBookCreatePage() {
           <button type="button" className="ghost-button" onClick={() => void handleAiIngest()} disabled={isAiPending || aiFiles.length === 0}>
             {isAiPending ? "AI 辨識中..." : "用 AI 帶入欄位"}
           </button>
+          <button
+            type="button"
+            className="ghost-button"
+            onClick={() => {
+              setAiFiles([]);
+              setAiMessage("已清空 AI 圖片");
+            }}
+            disabled={aiFiles.length === 0}
+          >
+            清空 AI 圖片
+          </button>
         </div>
+        <small>目前 AI 圖片數量：{aiFiles.length} / 3</small>
+        <CameraCapture label="用相機拍 AI 辨識圖片" onCapture={(file) => handleAiCameraCapture(file)} />
         {aiMessage ? <div className="feedback">{aiMessage}</div> : null}
       </section>
 
