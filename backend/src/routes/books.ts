@@ -1,3 +1,5 @@
+import path from "node:path";
+
 import { Router } from "express";
 import { ZodError } from "zod";
 
@@ -18,14 +20,42 @@ import {
 } from "../features/books/repository.js";
 import { lookupBookByIsbn } from "../features/books/isbn-lookup.js";
 import { createBookSchema, updateBookSchema } from "../features/books/schemas.js";
+import { ingestBookFromImages } from "../features/books/image-ingest.js";
+import { backendRoot } from "../config/paths.js";
+import { createImageUpload } from "../lib/uploads.js";
 
 export const booksRouter = Router();
+
+const aiIngestUpload = createImageUpload(path.resolve(backendRoot, "uploads", "ai-ingest"));
 
 booksRouter.get(
   "/",
   asyncHandler(async (_req, res) => {
     const rows = await listBooks();
     res.json({ items: rows.map(mapBook) });
+  }),
+);
+
+booksRouter.post(
+  "/ingest/image",
+  aiIngestUpload.array("images", 3),
+  asyncHandler(async (req, res) => {
+    const files = (req.files as Express.Multer.File[] | undefined) ?? [];
+    const imagePaths = files.map((file) => file.path);
+    const ai = await ingestBookFromImages(imagePaths);
+
+    res.json({
+      item: {
+        title: ai.title || null,
+        author: Array.isArray(ai.authors) ? ai.authors.join("、") || null : null,
+        publisher: ai.publisher || null,
+        publishYear: ai.pub_year ? Number(ai.pub_year) || null : null,
+        isbn: ai.isbn || null,
+        materialType: ai.material_type || null,
+        confidence: ai.confidence ?? null,
+        notes: ai.notes || null,
+      },
+    });
   }),
 );
 

@@ -12,8 +12,9 @@ import {
 
 import { BarcodeScanner } from "../../../components/barcode-scanner";
 import { CameraCapture } from "../../../components/camera-capture";
-import { apiRequest } from "../../../lib/api";
+import { apiRequest, getApiUrl } from "../../../lib/api";
 import { uploadImage } from "../../../lib/upload";
+import { getOperatorRequestHeaders } from "../../../lib/auth";
 
 type ScanMode = "auto" | "isbn" | "accession";
 
@@ -73,6 +74,18 @@ type CreateBookResponse = {
   };
 };
 
+type AiIngestResponse = {
+  item: {
+    title: string | null;
+    author: string | null;
+    publisher: string | null;
+    publishYear: number | null;
+    isbn: string | null;
+    confidence: number | null;
+    notes: string | null;
+  };
+};
+
 const REQUIRED_METADATA_FIELDS = ["書名", "作者", "出版社", "出版年"] as const;
 
 const scanModeOptions: Array<{ value: ScanMode; label: string; helper: string }> = [
@@ -113,6 +126,9 @@ export default function MobileBookCreatePage() {
   const [publishYear, setPublishYear] = useState("");
   const [remark, setRemark] = useState("");
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [aiFiles, setAiFiles] = useState<File[]>([]);
+  const [aiMessage, setAiMessage] = useState<string | null>(null);
+  const [isAiPending, setIsAiPending] = useState(false);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [lookupMessage, setLookupMessage] = useState<string | null>(null);
   const [lookupTrace, setLookupTrace] = useState<{
@@ -414,6 +430,55 @@ export default function MobileBookCreatePage() {
     void checkDuplicates(isbn, accessionCode);
   }
 
+  async function handleAiIngest() {
+    if (aiFiles.length === 0) {
+      setAiMessage("請先選擇至少一張圖片。");
+      return;
+    }
+
+    setIsAiPending(true);
+    setAiMessage("AI 辨識中...");
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      aiFiles.forEach((file) => formData.append("images", file));
+
+      const response = await fetch(getApiUrl("/api/books/ingest/image"), {
+        method: "POST",
+        headers: {
+          ...getOperatorRequestHeaders(),
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => ({}))) as { message?: string };
+        throw new Error(payload.message || "AI 影像辨識失敗");
+      }
+
+      const payload = (await response.json()) as AiIngestResponse;
+      const item = payload.item;
+
+      if (item.isbn) {
+        setIsbn(item.isbn);
+        void checkDuplicates(item.isbn, accessionCode);
+      }
+      if (item.title) setTitle(item.title);
+      if (item.author) setAuthor(item.author);
+      if (item.publisher) setPublisher(item.publisher);
+      if (typeof item.publishYear === "number") setPublishYear(String(item.publishYear));
+      const notes = item.notes ?? "";
+      if (notes) setRemark((prev) => (prev ? `${prev}\n${notes}` : notes));
+
+      setAiMessage(`AI 已帶入欄位${item.confidence != null ? `（信心 ${Math.round(item.confidence * 100)}%）` : ""}。`);
+    } catch (ingestError) {
+      setAiMessage(ingestError instanceof Error ? ingestError.message : "AI 影像辨識失敗");
+    } finally {
+      setIsAiPending(false);
+    }
+  }
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage(null);
@@ -501,6 +566,29 @@ export default function MobileBookCreatePage() {
         onDetected={handleBookCodeDetected}
         closeSignal={scannerCloseSignal}
       />
+
+      <section className="mobile-form">
+        <div className="field">
+          <span>AI 圖片辨識（選填）</span>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(event) => {
+              const files = Array.from(event.target.files ?? []);
+              setAiFiles(files.slice(0, 3));
+              setAiMessage(files.length > 0 ? `已選擇 ${Math.min(files.length, 3)} 張` : null);
+            }}
+          />
+          <small>可上傳封面/版權頁，最多 3 張，帶入 ISBN、書名、作者、出版社、出版年。</small>
+        </div>
+        <div className="inline-actions">
+          <button type="button" className="ghost-button" onClick={() => void handleAiIngest()} disabled={isAiPending || aiFiles.length === 0}>
+            {isAiPending ? "AI 辨識中..." : "用 AI 帶入欄位"}
+          </button>
+        </div>
+        {aiMessage ? <div className="feedback">{aiMessage}</div> : null}
+      </section>
 
       <form className="mobile-form" onSubmit={handleSubmit}>
         <label className="field">
