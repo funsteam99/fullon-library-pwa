@@ -446,8 +446,11 @@ export default function MobileBookCreatePage() {
   }
 
   function handleAiCameraCapture(file: File) {
-    setAiFiles([file]);
-    setAiMessage("已更新為最新相機圖片，可執行 AI 辨識。");
+    setAiFiles((prev) => {
+      const next = [...prev, file];
+      return next.slice(0, 3);
+    });
+    setAiMessage("已加入相機圖片，可執行 AI 辨識。");
   }
 
   async function handleAiIngest() {
