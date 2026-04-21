@@ -521,7 +521,6 @@ export default function MobileBookCreatePage() {
       if (notes) setRemark((prev) => (prev ? `${prev}\n${notes}` : notes));
 
       setAiMessage(`AI 已帶入欄位${item.confidence != null ? `（信心 ${Math.round(item.confidence * 100)}%）` : ""}。`);
-      setAiFiles([]);
     } catch (ingestError) {
       const base = ingestError instanceof Error ? ingestError.message : "AI 影像辨識失敗";
       let hint = "";
@@ -655,8 +654,7 @@ export default function MobileBookCreatePage() {
             type="button"
             className="ghost-button"
             onClick={() => {
-              setAiFiles([]);
-              setAiMessage("已清空 AI 圖片");
+                      setAiMessage("已清空 AI 圖片");
             }}
             disabled={aiFiles.length === 0}
           >
@@ -665,25 +663,6 @@ export default function MobileBookCreatePage() {
         </div>
         <small>目前 AI 圖片數量：{aiFiles.length} / 3</small>
         <CameraCapture label="用相機拍 AI 辨識圖片" onCapture={(file) => handleAiCameraCapture(file)} />
-
-        {aiFiles.length > 0 ? (
-          <div className="feedback-meta">
-            <div>AI 圖片可作為封面候選（點選套用）：</div>
-            <div className="inline-actions">
-              {aiFiles.map((file, index) => (
-                <button
-                  key={`${file.name}-${index}`}
-                  type="button"
-                  className="ghost-button"
-                  onClick={() => useAiImageAsCover(index)}
-                  title="設為封面候選"
-                >
-                  {index + 1}. {file.name || `相機圖片 ${index + 1}`}
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : null}
 
         {aiMessage ? <div className="feedback">{aiMessage}</div> : null}
       </section>
@@ -848,6 +827,25 @@ export default function MobileBookCreatePage() {
         </label>
 
         <CameraCapture label="用桌機相機拍封面" onCapture={handleCoverSelected} />
+
+        {aiPreviewUrls.length > 0 ? (
+          <div className="feedback-meta">
+            <div>AI 候選照片（點選縮圖設為封面）</div>
+            <div className="cover-candidate-grid">
+              {aiPreviewUrls.map((url, index) => (
+                <button
+                  key={`${url}-${index}`}
+                  type="button"
+                  className="cover-candidate-button"
+                  onClick={() => useAiImageAsCover(index)}
+                  title="設為封面候選"
+                >
+                  <img src={url} alt={`AI 候選 ${index + 1}`} className="cover-candidate-thumb" />
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         {coverPreview ? (
           <div className="cover-preview-card">

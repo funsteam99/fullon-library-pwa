@@ -714,3 +714,41 @@ button {
     width: 100%;
   }
 }
+
+
+.ai-action-button {
+  background: color-mix(in oklab, #2f855a 20%, white);
+  border-color: color-mix(in oklab, #2f855a 45%, white);
+  color: #1f5139;
+  font-weight: 700;
+}
+
+.scan-action-button {
+  background: color-mix(in oklab, #2563eb 18%, white);
+  border-color: color-mix(in oklab, #2563eb 45%, white);
+  color: #1e429f;
+  font-weight: 700;
+}
+
+
+.cover-candidate-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.cover-candidate-button {
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: color-mix(in oklab, white 86%, var(--paper-strong) 14%);
+}
+
+.cover-candidate-thumb {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  display: block;
+}

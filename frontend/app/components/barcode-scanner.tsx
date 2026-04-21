@@ -21,6 +21,7 @@ type BarcodeScannerProps = {
   onDetected: (code: string) => void;
   preferredZoom?: number;
   closeSignal?: number;
+  labelButtonClassName?: string;
 };
 
 const SOUND_STORAGE_KEY = "library-scanner-sound-enabled";
@@ -70,6 +71,7 @@ export function BarcodeScanner({
   onDetected,
   preferredZoom = 2,
   closeSignal,
+  labelButtonClassName,
 }: BarcodeScannerProps) {
   const regionId = useId().replace(/:/g, "");
   const scannerRef = useRef<BarcodeScannerHandle | null>(null);
@@ -337,7 +339,7 @@ export function BarcodeScanner({
         </div>
         <button
           type="button"
-          className="ghost-button"
+          className={`ghost-button ${labelButtonClassName ?? ""}`}
           onClick={() => setIsOpen((current) => !current)}
           disabled={!cameraSupported}
         >
