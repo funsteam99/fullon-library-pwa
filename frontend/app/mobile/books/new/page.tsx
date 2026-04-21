@@ -431,11 +431,8 @@ export default function MobileBookCreatePage() {
   }
 
   function handleAiCameraCapture(file: File) {
-    setAiFiles((prev) => {
-      const next = [...prev, file];
-      return next.slice(0, 3);
-    });
-    setAiMessage("已加入相機圖片，可執行 AI 辨識。");
+    setAiFiles([file]);
+    setAiMessage("已更新為最新相機圖片，可執行 AI 辨識。");
   }
 
   async function handleAiIngest() {
@@ -482,6 +479,7 @@ export default function MobileBookCreatePage() {
       if (notes) setRemark((prev) => (prev ? `${prev}\n${notes}` : notes));
 
       setAiMessage(`AI 已帶入欄位${item.confidence != null ? `（信心 ${Math.round(item.confidence * 100)}%）` : ""}。`);
+      setAiFiles([]);
     } catch (ingestError) {
       const base = ingestError instanceof Error ? ingestError.message : "AI 影像辨識失敗";
       let hint = "";
