@@ -115,6 +115,19 @@ function isLikelyCompleteIsbn(value: string) {
   return normalized.length === 10 || normalized.length === 13;
 }
 
+function resolveAiIngestUrl() {
+  if (typeof window === "undefined") {
+    return getApiUrl("/api/books/ingest/image");
+  }
+
+  const envBase = process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (envBase) {
+    return `${envBase}/api/books/ingest/image`;
+  }
+
+  return `${window.location.protocol}//${window.location.hostname}:4000/api/books/ingest/image`;
+}
+
 export default function MobileBookCreatePage() {
   const [scanMode, setScanMode] = useState<ScanMode>("auto");
   const [scannerCloseSignal, setScannerCloseSignal] = useState(0);
@@ -449,7 +462,7 @@ export default function MobileBookCreatePage() {
       const formData = new FormData();
       aiFiles.forEach((file) => formData.append("images", file));
 
-      const response = await fetch(getApiUrl("/api/books/ingest/image"), {
+      const response = await fetch(resolveAiIngestUrl(), {
         method: "POST",
         headers: {
           ...getOperatorRequestHeaders(),
